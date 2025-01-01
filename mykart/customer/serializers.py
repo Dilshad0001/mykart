@@ -21,3 +21,7 @@ class Regserializer(serializers.ModelSerializer):
         user.save()
         return user
 
+
+class LogSerializer(serializers.Serializer):
+    username=serializers.CharField()
+    password=serializers.CharField()
