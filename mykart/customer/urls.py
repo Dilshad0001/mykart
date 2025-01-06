@@ -2,7 +2,7 @@ from django.urls import path,include
 from. import views
 # from adminuser.views import 
 from rest_framework.routers import DefaultRouter
-from adminuser.views import productadminview
+from adminuser.views import productadminview,adminuserlistview
 
 
 # router = DefaultRouter()
@@ -12,15 +12,15 @@ router = DefaultRouter()
 router.register('product', productadminview, basename='product')
 urlpatterns = [
     path('log/',views.Userlog.as_view()),
-    path('ghj/',views.Productuserview.as_view()),
+    path('g/',views.Productuserview.as_view()),
     path('hj/',views.wishlistuserview.as_view()),
     path('ede/',views.cartuserview.as_view()),
     # path('k/',userlistadminview.as_view()),
     # path('n/',include(router.urls)),
     path('mm/',views.WishlistCreateView.as_view()),
     path('ll/',views.userregister.as_view()),
-    path('', include(router.urls)),
-
+    path('jhg/', include(router.urls)),
+    path('',adminuserlistview.as_view()),
 
 
 ]

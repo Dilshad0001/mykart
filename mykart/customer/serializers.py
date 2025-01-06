@@ -74,7 +74,7 @@ class productserialser(serializers.ModelSerializer):
 class customerserialiser(serializers.ModelSerializer):
     class Meta:
         model=User
-        fields=['']
+        fields=['username']
 
 # <---wishlist---->
 
