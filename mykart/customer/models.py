@@ -78,7 +78,7 @@ class wishlist(models.Model):
 class Cart(models.Model):
     product=models.ForeignKey(Product,on_delete=models.CASCADE)
     customer=models.ForeignKey(User, on_delete=models.CASCADE)
-    count=models.IntegerField()
+    count=models.IntegerField(default=1)
 
 
     def __str__(self):

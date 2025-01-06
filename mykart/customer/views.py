@@ -72,17 +72,27 @@ from .serializers import wishlistserialiser,customerserialiser
 class wishlistuserview(APIView):
     permission_classes=[IsAuthenticated]
     def get(self,request):
-        obj=wishlist.objects.all()
+        use_r=request.user
+        obj=wishlist.objects.filter(customer=use_r)
         ser=wishlistserialiser(obj,many=True) 
         return Response(ser.data)
-    
-    def post(self,request):
+
+    def post(self, request):
+        serializer = wishlistserialiser(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=201)
+        return Response(serializer.errors, status=400)   
+
+    def delete(self,request):
+        use_r=request.user
         k=request.data
-        ser=wishlistserialiser(data=k,context={'request':request})
-        if ser.is_valid():
-            ser.save()
-            return Response(ser.data)
-        return Response(ser.errors)
+        obj=k['product']
+        dat_a=wishlist.objects.filter(customer=use_r,product=obj)
+        if dat_a is None:
+            return Response('no data found')
+        dat_a.delete()
+        return Response('data_deleted') 
     
     
 # <---cart users--->
@@ -94,7 +104,8 @@ from .serializers import cartserialiser
 class cartuserview(APIView):
     permission_classes = [IsAuthenticated]
     def get(self,request):
-        obj=Cart.objects.all()
+        # k=request.user
+        obj=Cart.objects.filter(customer=request.user)
         ser=cartserialiser(obj,many=True) 
         return Response(ser.data)
     
@@ -103,8 +114,19 @@ class cartuserview(APIView):
         ser=cartserialiser(data=k,context={'request':request})
         if ser.is_valid():
             ser.save()
-            return Response('success')
+            return Response(ser.data)
         return Response(ser.errors)
+    
+    def delete(self,request):
+        use_r=request.user
+        k=request.data
+        obj=k['product']
+        dat_a=Cart.objects.filter(customer=use_r,product=obj)
+        if dat_a is None:
+            return Response('no data found')
+        dat_a.delete()
+        return Response('data_deleted')
+
 
 from rest_framework import generics
 

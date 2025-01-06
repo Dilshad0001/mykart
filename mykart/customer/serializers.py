@@ -75,37 +75,45 @@ class customerserialiser(serializers.ModelSerializer):
 class wishlistserialiser(serializers.ModelSerializer):
     product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all()) 
     customer = serializers.HiddenField(default=serializers.CurrentUserDefault())  
-       
     # product=productserialser()
     # customer=customerserialiser()
     class Meta:
         model=wishlist
         fields=['product','customer']
 
-    def create(self,validated_data):
-        produc_t = validated_data['product'] 
-        user= validated_data['customer']
-        k=User.objects.filter(id=user.id).first()
-        obj=Product.objects.filter(id=produc_t.id).first()
-        wishlist_data=wishlist.objects.create(product=obj,customer=k)
-        return wishlist_data
 
+    def to_representation(self, instance):
+        return {
+            "product": productserialser(instance.product).data,
+            "customer": instance.customer.id
+    }    
+
+    def create(self,validated_data):
+        wishlist_data=wishlist.objects.create(product=validated_data['product'],customer=validated_data['customer'])
+        return wishlist_data
 
 # <---cart--->
 
 class cartserialiser(serializers.ModelSerializer):
-    product=productserialser()
-    customer=customerserialiser()
+    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all()) 
+    customer = serializers.HiddenField(default=serializers.CurrentUserDefault()) 
+    # product=productserialser()
+    # customer=customerserialiser()
     class Meta:
         model=Cart
         fields=['product','customer']
 
+    def to_representation(self, instance):
+        return{
+            "product":productserialser(instance.product).data,
+            "customer":instance.customer.id
+        }    
+
     def create(self,validated_data):
         produc_t = validated_data['product'] 
         user= validated_data['customer']
-        k=User.objects.filter(id=user.id).first()
         obj=Product.objects.filter(id=produc_t.id).first()
-        cart_data=wishlist.objects.create(product=obj,customer=k)        
+        cart_data=Cart.objects.create(product=obj,customer=user)        
         return cart_data
     
 
