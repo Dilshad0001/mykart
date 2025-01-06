@@ -47,6 +47,27 @@ class productserialser(serializers.ModelSerializer):
         model=Product
         fields = ['id', 'product_name', 'category','product_price', 'product_rating', 'product_image']
 
+    def create(self,validated_data):
+        category_data=validated_data.pop('category')
+        k=Category.objects.filter(category_name=category_data['category_name']).first()
+        if k is None:
+            k=Category.objects.create(**category_data)
+        new_product=Product.objects.create(category=k,**validated_data)
+        return new_product  
+
+    def update(self, instance, validated_data):
+        category_data=validated_data.pop('category',None)
+        if category_data:
+            k=Category.objects.filter(category_name=category_data['category_name'])
+            if k is None:
+                k=Category.objects.create(**category_data)
+        instance.product_name = validated_data.get('product_name', instance.product_name)
+        instance.product_price = validated_data.get('product_price', instance.product_price)
+        instance.product_rating = validated_data.get('product_rating', instance.product_rating)
+        instance.product_image = validated_data.get('product_image', instance.product_image)
+        instance.save()
+        return instance
+
 
 # <---customer--->
 
@@ -56,21 +77,7 @@ class customerserialiser(serializers.ModelSerializer):
         fields=['']
 
 # <---wishlist---->
-# class wishlistserialiser(serializers.ModelSerializer):
-    # product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())  # This will receive the product ID
-    # customer = serializers.HiddenField(default=serializers.CurrentUserDefault())  # Automatically set the customer to the authenticated user
-    
-    # class Meta:
-    #     model = wishlist
-    #     fields = ['product', 'customer']
 
-    # def create(self, validated_data):
-    #     product = validated_data['product']  # This is a Product instance, not a dictionary
-    #     customer = validated_data['customer']  # Automatically set by the serializer to the authenticated user
-        
-    #     # Create and return the wishlist entry
-    #     wishlist_entry = wishlist.objects.create(product=product, customer=customer)
-    #     return wishlist_entry
 
 class wishlistserialiser(serializers.ModelSerializer):
     product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all()) 
