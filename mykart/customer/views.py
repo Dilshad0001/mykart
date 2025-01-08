@@ -128,13 +128,11 @@ class cartuserview(APIView):
         return Response('data_deleted')
 
 
-from rest_framework import generics
+# from rest_framework import generics
 
-class WishlistCreateView(generics.CreateAPIView):
-    queryset = wishlist.objects.all()
-    serializer_class = wishlistserialiser       
-
-
+# class WishlistCreateView(generics.CreateAPIView):
+#     queryset = wishlist.objects.all()
+#     serializer_class = wishlistserialiser       
 
 
 
@@ -142,7 +140,7 @@ class WishlistCreateView(generics.CreateAPIView):
 
 # <---order details-->
 from .models import Orderdetails
-from .serializers import orderserialiser
+from .serializers import orderserialiser,orderserialiseradmin
 
 
 class orderuserview(APIView):
@@ -175,5 +173,30 @@ class orderuserview(APIView):
         )
         ser=orderserialiser(order) 
         return Response(ser.data)
-
     
+
+# <-- order details admin view--->
+    
+class orderadminview(APIView):
+    def get(self,request):
+        keyword=request.GET.get('keyword')
+        if keyword:
+            obj=Orderdetails.objects.filter(user__username__startswith=keyword)
+        else:
+            obj=Orderdetails.objects.all()
+        ser=orderserialiseradmin(obj,many=True)
+        return Response(ser.data)        
+    def put(self,request):
+        k=request.data
+        order_data=Orderdetails.objects.filter(id=k['id']).first()
+        if order_data is None:
+            return Response('order not found')
+        ser=orderserialiseradmin(order_data,data=k,partial=True)
+        if ser.is_valid():
+            ser.save()
+            return Response(ser.data)
+        return Response(ser.errors)
+    
+        
+
+

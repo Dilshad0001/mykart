@@ -134,4 +134,23 @@ class orderserialiser(serializers.ModelSerializer):
     product=productserialser()
     class Meta:
         model=Orderdetails
-        fields=['user','product','status','payment_status','total_amount','delivery_address','date','quantity']
+        fields=['id','user','product','status','payment_status','total_amount','delivery_address','date','quantity']
+
+
+ 
+class orderserialiseradmin(serializers.ModelSerializer):
+    user=customerserialiser()
+    product=productserialser()
+    class Meta:
+        model=Orderdetails
+        fields=['id','user','product','status','payment_status','total_amount','delivery_address','date','quantity']     
+
+    def update(self,instance,validated_data):
+        instance.payment_status=validated_data.get('payment_status',instance.payment_status)   
+        instance.status=validated_data.get('status',instance.status)
+
+
+
+
+        instance.save()
+        return instance

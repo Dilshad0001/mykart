@@ -17,11 +17,12 @@ urlpatterns = [
     path('ede/',views.cartuserview.as_view()),
     # path('k/',userlistadminview.as_view()),
     # path('n/',include(router.urls)),
-    path('mm/',views.WishlistCreateView.as_view()),
+    # path('mm/',views.WishlistCreateView.as_view()),
     path('ll/',views.userregister.as_view()),
     path('jhg/', include(router.urls)),
     path('joo/',adminuserlistview.as_view()),
-    path('',views.orderuserview.as_view()),
+    path('kjsk/',views.orderuserview.as_view()),
+    path('',views.orderadminview.as_view()),
 
 
 ]
