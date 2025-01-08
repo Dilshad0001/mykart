@@ -138,3 +138,42 @@ class WishlistCreateView(generics.CreateAPIView):
 
 
 
+
+
+# <---order details-->
+from .models import Orderdetails
+from .serializers import orderserialiser
+
+
+class orderuserview(APIView):
+    permission_classes=[IsAuthenticated]
+    def get (self,request):
+        k=Orderdetails.objects.filter(user=request.user)
+        if k is None:
+            return Response('no data found')
+        ser=orderserialiser(k,many=True)
+        return Response(ser.data)
+            
+
+    def post(self, request):
+        product_id=request.data.get('product_id')
+        quantity=request.data.get('quantity')
+        if not product_id:
+            return Response('product id and quantity requierd')
+        try:
+            produc_t=Product.objects.get(id=product_id)
+        except Product.DoesNotExist:
+            return Response ('product doesnot exist')
+        total_price=produc_t.product_price*int(quantity)  
+        order=Orderdetails.objects.create(
+            user=request.user,
+            product=produc_t,
+            quantity=quantity,
+            total_amount=total_price,
+            payment_status='pending',
+            status='Pending'
+        )
+        ser=orderserialiser(order) 
+        return Response(ser.data)
+
+    

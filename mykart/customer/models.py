@@ -28,7 +28,7 @@ class User(AbstractBaseUser,PermissionsMixin):
 
     objects = CustomUserManager()
 
-    USERNAME_FIELD = "username"  
+    USERNAME_FIELD = "username"   
     REQUIRED_FIELDS = []  
 
     def __str__(self):
@@ -68,7 +68,7 @@ class Product(models.Model):
 
 class wishlist(models.Model):
     product=models.ForeignKey(Product,on_delete=models.CASCADE)
-    customer=models.ForeignKey(User, on_delete=models.CASCADE)
+    customer=models.ForeignKey(User, on_delete=models.CASCADE, null=True)
 
 
     def __str__(self):
@@ -83,3 +83,29 @@ class Cart(models.Model):
 
     def __str__(self):
         return self.product.product_name    
+    
+
+from datetime import datetime
+
+class Orderdetails(models.Model):
+    user=models.ForeignKey(User,on_delete=models.CASCADE)
+    product=models.ForeignKey(Product, on_delete=models.CASCADE)  
+    status = models.CharField(max_length=20, choices=[
+        ('Pending', 'Pending'),
+        ('Completed', 'Completed'),
+        ('Cancelled', 'Cancelled'),
+        ('Refunded', 'Refunded'),
+    ])
+    payment_status = models.CharField(max_length=20, choices=[
+        ('Paid', 'Paid'),
+        ('Pending', 'Pending'),
+        ('Failed', 'Failed'),
+    ])
+    total_amount=models.IntegerField()
+    delivery_address=models.TextField()
+    date=models.DateTimeField(default=datetime.now)
+    quantity = models.IntegerField(default=1)
+
+    def __str__(self):
+        return f"Order {self.id} by {self.user.username}"
+

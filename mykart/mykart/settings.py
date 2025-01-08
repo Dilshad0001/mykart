@@ -30,6 +30,9 @@ INSTALLED_APPS = [
     'customer',
     'adminuser',
     'rest_framework',
+    'payments'
+
+
 ]
 
 MIDDLEWARE = [
@@ -134,3 +137,9 @@ SIMPLE_JWT = {
 
 
 AUTH_USER_MODEL = "customer.User"
+
+
+
+
+RAZORPAY_KEY_ID = "rzp_test_5Tfxi7MxVhxQ7y"
+RAZORPAY_SECRET = "zJfwuPE3GaOgKxPOXg6Jfv5U"

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from. models import Product,wishlist,Cart,User,Category
+from. models import Product,wishlist,Cart,User,Category,Orderdetails
 
 # <-- user register--->
 
@@ -128,3 +128,10 @@ class cartserialiser(serializers.ModelSerializer):
 
 
       
+
+class orderserialiser(serializers.ModelSerializer):
+    user= serializers.HiddenField(default=serializers.CurrentUserDefault()) 
+    product=productserialser()
+    class Meta:
+        model=Orderdetails
+        fields=['user','product','status','payment_status','total_amount','delivery_address','date','quantity']

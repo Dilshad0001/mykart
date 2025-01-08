@@ -20,7 +20,8 @@ urlpatterns = [
     path('mm/',views.WishlistCreateView.as_view()),
     path('ll/',views.userregister.as_view()),
     path('jhg/', include(router.urls)),
-    path('',adminuserlistview.as_view()),
+    path('joo/',adminuserlistview.as_view()),
+    path('',views.orderuserview.as_view()),
 
 
 ]
