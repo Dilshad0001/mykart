@@ -6,7 +6,7 @@ from django.db.models import Q
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import authenticate
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated,IsAdminUser
 
 
 
@@ -104,7 +104,6 @@ from .serializers import cartserialiser
 class cartuserview(APIView):
     permission_classes = [IsAuthenticated]
     def get(self,request):
-        # k=request.user
         obj=Cart.objects.filter(customer=request.user)
         ser=cartserialiser(obj,many=True) 
         return Response(ser.data)
@@ -120,8 +119,9 @@ class cartuserview(APIView):
     def delete(self,request):
         use_r=request.user
         k=request.data
-        obj=k['product']
-        dat_a=Cart.objects.filter(customer=use_r,product=obj)
+        # obj=k['product']
+        obj=k['id']
+        dat_a=Cart.objects.filter(customer=use_r,id=obj)
         if dat_a is None:
             return Response('no data found')
         dat_a.delete()
@@ -156,7 +156,9 @@ class orderuserview(APIView):
     def post(self, request):
         product_id=request.data.get('product_id')
         quantity=request.data.get('quantity')
-        if not product_id:
+        if not quantity:
+            quantity=1        
+        if not product_id :
             return Response('product id and quantity requierd')
         try:
             produc_t=Product.objects.get(id=product_id)
@@ -178,8 +180,9 @@ class orderuserview(APIView):
 # <-- order details admin view--->
     
 class orderadminview(APIView):
+    permission_classes=[IsAdminUser]
     def get(self,request):
-        keyword=request.GET.get('keyword')
+        keyword=request.GET.get('user')
         if keyword:
             obj=Orderdetails.objects.filter(user__username__startswith=keyword)
         else:
@@ -188,7 +191,7 @@ class orderadminview(APIView):
         return Response(ser.data)        
     def put(self,request):
         k=request.data
-        order_data=Orderdetails.objects.filter(id=k['id']).first()
+        order_data=Orderdetails.objects.filter(id=k['order_id']).first()
         if order_data is None:
             return Response('order not found')
         ser=orderserialiseradmin(order_data,data=k,partial=True)

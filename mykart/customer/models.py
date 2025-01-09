@@ -3,6 +3,8 @@ from django.contrib.auth.models import AbstractBaseUser
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager,PermissionsMixin
 from django.db import models
 
+# <---user registration--->
+
 class CustomUserManager(BaseUserManager):
     def create_user(self, username, password=None):
         if not username:
@@ -43,6 +45,7 @@ class User(AbstractBaseUser,PermissionsMixin):
 #         return self.username
 
 
+# <-- product category--->
 
 
 class Category(models.Model):
@@ -52,6 +55,7 @@ class Category(models.Model):
         return self.category_name
 
 
+# <--Product--->
 
 class Product(models.Model):
     product_name=models.CharField(max_length=20)
@@ -64,6 +68,7 @@ class Product(models.Model):
         return self.product_name
 
 
+# <--wishlist--->
     
 
 class wishlist(models.Model):
@@ -73,7 +78,9 @@ class wishlist(models.Model):
 
     def __str__(self):
         return self.product.product_name
-    
+
+# <--cart--->
+
 
 class Cart(models.Model):
     product=models.ForeignKey(Product,on_delete=models.CASCADE)

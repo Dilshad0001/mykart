@@ -61,6 +61,7 @@ class productserialser(serializers.ModelSerializer):
             k=Category.objects.filter(category_name=category_data['category_name'])
             if k is None:
                 k=Category.objects.create(**category_data)
+            # instance.category=k    
         instance.product_name = validated_data.get('product_name', instance.product_name)
         instance.product_price = validated_data.get('product_price', instance.product_price)
         instance.product_rating = validated_data.get('product_rating', instance.product_rating)
@@ -81,9 +82,7 @@ class customerserialiser(serializers.ModelSerializer):
 
 class wishlistserialiser(serializers.ModelSerializer):
     product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all()) 
-    customer = serializers.HiddenField(default=serializers.CurrentUserDefault())  
-    # product=productserialser()
-    # customer=customerserialiser()
+    customer = serializers.HiddenField(default=serializers.CurrentUserDefault()) 
     class Meta:
         model=wishlist
         fields=['product','customer']
@@ -104,23 +103,26 @@ class wishlistserialiser(serializers.ModelSerializer):
 class cartserialiser(serializers.ModelSerializer):
     product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all()) 
     customer = serializers.HiddenField(default=serializers.CurrentUserDefault()) 
-    # product=productserialser()
-    # customer=customerserialiser()
+
     class Meta:
         model=Cart
-        fields=['product','customer']
+        fields=['id','product','customer','count']
 
     def to_representation(self, instance):
         return{
+            "order_id":instance.id,
             "product":productserialser(instance.product).data,
-            "customer":instance.customer.id
+            "customer":instance.customer.id,
+            "count":instance.count
+            
         }    
 
     def create(self,validated_data):
         produc_t = validated_data['product'] 
         user= validated_data['customer']
+        coun_t=validated_data.get('count',1)
         obj=Product.objects.filter(id=produc_t.id).first()
-        cart_data=Cart.objects.create(product=obj,customer=user)        
+        cart_data=Cart.objects.create(product=obj,count=coun_t,customer=user)        
         return cart_data
     
 
@@ -148,9 +150,5 @@ class orderserialiseradmin(serializers.ModelSerializer):
     def update(self,instance,validated_data):
         instance.payment_status=validated_data.get('payment_status',instance.payment_status)   
         instance.status=validated_data.get('status',instance.status)
-
-
-
-
         instance.save()
         return instance

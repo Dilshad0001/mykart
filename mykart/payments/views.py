@@ -6,6 +6,7 @@ from rest_framework import status
 from django.conf import settings
 from .models import Order
 from .serializers import OrderSerializer
+from customer.models import Orderdetails
 
 # Razorpay API Keys
 RAZORPAY_KEY_ID = "rzp_test_5Tfxi7MxVhxQ7y"
@@ -16,26 +17,29 @@ class CreatePaymentView(APIView):
     def post(self, request):
         try:
             amoun_t = request.data.get("amount")
-            amount=amoun_t*100 # Convert to paise
+            orde_r_id=request.data.get("id")
+            amount=amoun_t*100 
             currency = "INR"
 
-            # Razorpay Order API
+
             payment_order = client.order.create({
                 "amount": amount,
                 "currency": currency,
-                "payment_capture": 1  # Auto capture
+                "payment_capture": 1  
             })
 
-            # Save order to DB
             order = Order(
                 order_id=payment_order['id'],
-                amount=amount / 100,  # Convert back to INR
+                amount=amount / 100, 
                 currency=currency
             )
             order.save()
+            k=Orderdetails.objects.get(id=orde_r_id)
+            k.payment_status="Paid"
+            k.save()
 
-            # Response to frontend
             return Response({
+                "message":"success",
                 "order_id": payment_order["id"],
                 "razorpay_key": RAZORPAY_KEY_ID,
                 "amount": amount,

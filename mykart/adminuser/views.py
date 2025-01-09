@@ -3,6 +3,9 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from django.db.models import Q
 from customer.models import User
+from rest_framework.permissions import IsAuthenticated,IsAdminUser
+
+
 # <-- product users view--->
 
 from customer .serializers import productserialser
@@ -10,6 +13,7 @@ from customer.models import Product
     
 
 class productadminview(ModelViewSet):
+    permission_classes=[IsAdminUser]
     queryset=Product.objects.all()
     serializer_class=productserialser  
 
@@ -23,9 +27,12 @@ class productadminview(ModelViewSet):
 
 
 # <---admi users list view--->
+
+
 from customer.serializers import customerserialiser
 
 class adminuserlistview(APIView):
+    permission_classes=[IsAdminUser]
     def get(self,request):
         keyword=request.GET.get('keyword')
         if keyword:
