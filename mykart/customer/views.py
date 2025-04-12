@@ -126,14 +126,14 @@ class cartuserview(APIView):
         return Response(ser.data)
     
     def post(self,request):
-        
+
         user_=request.user
         k=request.data
         print("kk--",k.get('product'))
         m=Cart.objects.filter(product__id=k.get('product'),customer=user_).first()
-        # print("mmm--",m.count)
         if m is not None:
             m.count=m.count+1
+
             m.save()
             ser = cartserialiser(m, context={'request': request})
             return Response(ser.data)
