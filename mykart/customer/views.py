@@ -1,12 +1,13 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from.models import Product,wishlist,Cart,User
+from.models import Product,wishlist,Cart,User,Category
 from django.db.models import Q
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import authenticate
 from rest_framework.permissions import IsAuthenticated,IsAdminUser
+from rest_framework import status
 
 
 
@@ -20,8 +21,10 @@ class userregister(APIView):
         ser=regserialiser(data=k)    
         if ser.is_valid():
             ser.save()
-            return Response('registration compleeted')
-        return Response(ser.errors)        
+            return Response({"messages": "registration completed"}, status=status.HTTP_201_CREATED)
+        print(ser.errors)
+        return Response(ser.errors, status=status.HTTP_400_BAD_REQUEST)  
+      
 
 
 # <--user login--->
@@ -45,6 +48,7 @@ class Userlog(APIView):
         return Response({
             'access_token': str(refresh.access_token),
             'refresh_token': str(refresh),
+            'message':"login sucess"
         }, status=200)
 
 
@@ -56,12 +60,24 @@ from .serializers import productserialser
 class Productuserview(APIView):
     def get(self,request):
         keyword=request.GET.get('keyword')
+        product_id=request.GET.get('id')
         if keyword:
             obj=Product.objects.filter(Q(product_name__startswith=keyword)|Q(category__category_name__startswith=keyword))
+        elif product_id:
+            obj=Product.objects.filter(id=product_id)
         else:
             obj=Product.objects.all()
-        ser=productserialser(obj,many=True) 
+
+        ser=productserialser(obj,many=True)      
         return Response(ser.data)   
+    # def patch(self,request):
+    #     data_=request.data
+    #     quantity_change=data_.quantityChange
+    #     product_id=data_.productId
+    #     ins=Product.objects.get(id=product_id)
+    #     k=ins.quantity+quantity_change
+    #     ser=productserialser(ins,data=quantity_change,partial=True)
+
     
 
 
@@ -83,6 +99,7 @@ class wishlistuserview(APIView):
             serializer.save()
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)   
+
 
     def delete(self,request):
         use_r=request.user
@@ -109,17 +126,40 @@ class cartuserview(APIView):
         return Response(ser.data)
     
     def post(self,request):
+        user_=request.user
         k=request.data
+        print("kk--",k.get('product'))
+        m=Cart.objects.filter(product__id=k.get('product'),customer=user_).first()
+        # print("mmm--",m.count)
+        if m is not None:
+            m.count=m.count+1
+            m.save()
+            ser = cartserialiser(m, context={'request': request})
+            return Response(ser.data)
         ser=cartserialiser(data=k,context={'request':request})
         if ser.is_valid():
             ser.save()
             return Response(ser.data)
         return Response(ser.errors)
+    def patch(self,request):
+        user_=request.user
+        data_=request.data
+        cart_id=data_.get('order_id')
+        if cart_id is None:
+            return Response(" order_id requierd ")    
+        ins=Cart.objects.get(id=cart_id)
+        new_count=data_.get('count')
+        if new_count is None:
+            return Response("enter count") 
+        ser=cartserialiser(ins,data=data_,partial=True)
+        if ser.is_valid():
+            ser.save()
+            return Response("done")
+        return Response(ser.errors)
     
     def delete(self,request):
         use_r=request.user
         k=request.data
-        # obj=k['product']
         obj=k['id']
         dat_a=Cart.objects.filter(customer=use_r,id=obj)
         if dat_a is None:
@@ -200,6 +240,11 @@ class orderadminview(APIView):
             return Response(ser.data)
         return Response(ser.errors)
     
-        
+    
+from .serializers import categoryserialiser
 
-
+class CategoryUserView(APIView):
+    def get(self,request):
+        data=Category.objects.all()
+        ser=categoryserialiser(data,many=True)
+        return Response(ser.data)

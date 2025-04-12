@@ -14,6 +14,10 @@ urlpatterns = [
     path('reg/',views.userregister.as_view()),
     path('users/',adminuserlistview.as_view()),
 
+# category
+    path('category/',views.CategoryUserView.as_view()),
+
+
 # product
     path('product/',views.Productuserview.as_view()),
     path('adminproduct/', include(router.urls)),

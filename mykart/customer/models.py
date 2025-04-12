@@ -38,18 +38,13 @@ class User(AbstractBaseUser,PermissionsMixin):
 
 
 
-# class Customer_data(AbstractBaseUser):
-#     username=models.CharField(max_length=100)
-
-#     def __str__(self):
-#         return self.username
-
 
 # <-- product category--->
 
 
 class Category(models.Model):
     category_name=models.CharField(max_length=20)
+    category_image=models.ImageField(upload_to='image/',null=True)
 
     def __str__(self):
         return self.category_name
@@ -60,9 +55,13 @@ class Category(models.Model):
 class Product(models.Model):
     product_name=models.CharField(max_length=20)
     category=models.ForeignKey(Category,on_delete=models.CASCADE)
-    product_rating=models.IntegerField(null=True)
+    # product_rating=models.IntegerField(null=True)
     product_price = models.IntegerField()
     product_image=models.ImageField(upload_to='image/',null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    product_decription=models.TextField(null=True,blank=True)
+    # quantity=models.PositiveIntegerField(default=1)
+
 
     def __str__(self):
         return self.product_name
@@ -85,7 +84,7 @@ class wishlist(models.Model):
 class Cart(models.Model):
     product=models.ForeignKey(Product,on_delete=models.CASCADE)
     customer=models.ForeignKey(User, on_delete=models.CASCADE)
-    count=models.IntegerField(default=1)
+    count=models.PositiveIntegerField(default=1)
 
 
     def __str__(self):

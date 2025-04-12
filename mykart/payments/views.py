@@ -8,7 +8,7 @@ from .models import Order
 from .serializers import OrderSerializer
 from customer.models import Orderdetails
 
-# Razorpay API Keys
+
 RAZORPAY_KEY_ID = "rzp_test_5Tfxi7MxVhxQ7y"
 RAZORPAY_SECRET = "zJfwuPE3GaOgKxPOXg6Jfv5U"
 client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_SECRET))

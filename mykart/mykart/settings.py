@@ -30,12 +30,15 @@ INSTALLED_APPS = [
     'customer',
     'adminuser',
     'rest_framework',
-    'payments'
+    'payments',
+    'corsheaders',
 
 
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',  
+    'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -143,3 +146,19 @@ AUTH_USER_MODEL = "customer.User"
 
 RAZORPAY_KEY_ID = "rzp_test_5Tfxi7MxVhxQ7y"
 RAZORPAY_SECRET = "zJfwuPE3GaOgKxPOXg6Jfv5U"
+
+
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://localhost:3000", 
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
+
+
+import os
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

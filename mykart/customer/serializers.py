@@ -12,7 +12,7 @@ class regserialiser(serializers.ModelSerializer):
 
     def validate(self,user_data):
         if user_data['password']!=user_data['password2']:
-            raise serializers.ValidationError('password doesnot match')
+            raise serializers.ValidationError({"message":"password is not match"})
 
         return user_data
     def create(self,validated_data):
@@ -37,7 +37,7 @@ class LogSerializer(serializers.Serializer):
 class categoryserialiser(serializers.ModelSerializer):
     class Meta:
         model=Category
-        fields=['category_name']
+        fields=['category_name','category_image']
 
 # <---product--->
 
@@ -45,7 +45,7 @@ class productserialser(serializers.ModelSerializer):
     category=categoryserialiser()
     class Meta:
         model=Product
-        fields = ['id', 'product_name', 'category','product_price', 'product_rating', 'product_image']
+        fields = ['id', 'product_name', 'category','product_price', 'product_image','created_at','product_decription']
 
     def create(self,validated_data):
         category_data=validated_data.pop('category')
@@ -96,6 +96,7 @@ class wishlistserialiser(serializers.ModelSerializer):
 
     def create(self,validated_data):
         wishlist_data=wishlist.objects.create(product=validated_data['product'],customer=validated_data['customer'])
+        # print(self.context['request'].user,"......")
         return wishlist_data
 
 # <---cart--->
@@ -124,6 +125,11 @@ class cartserialiser(serializers.ModelSerializer):
         obj=Product.objects.filter(id=produc_t.id).first()
         cart_data=Cart.objects.create(product=obj,count=coun_t,customer=user)        
         return cart_data
+    def update(self, instance, validated_data):
+        print("hhhhhhh")
+        instance.count=validated_data.get('count',instance.count)
+        instance.save()
+        return instance
     
 
 
