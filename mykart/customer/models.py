@@ -85,24 +85,28 @@ class Cart(models.Model):
     product=models.ForeignKey(Product,on_delete=models.CASCADE)
     customer=models.ForeignKey(User, on_delete=models.CASCADE)
     count=models.PositiveIntegerField(default=1)
+    sub_total_amount=models.FloatField(default=0)
+    is_finished=models.BooleanField(default=False)
 
 
     def __str__(self):
-        return self.product.product_name    
+        return f"{self.product.product_name}--{self.customer.username}"    
     
 
 from datetime import datetime
 
 class Orderdetails(models.Model):
     user=models.ForeignKey(User,on_delete=models.CASCADE)
-    product=models.ForeignKey(Product, on_delete=models.CASCADE)  
-    status = models.CharField(max_length=20, choices=[
+    # cart=models.ForeignKey(Cart, on_delete=models.CASCADE, null=True) 
+    carts = models.ManyToManyField(Cart)
+ 
+    status = models.CharField(max_length=20, default='prnding', choices=[
         ('Pending', 'Pending'),
         ('Completed', 'Completed'),
         ('Cancelled', 'Cancelled'),
         ('Refunded', 'Refunded'),
     ])
-    payment_status = models.CharField(max_length=20, choices=[
+    payment_status = models.CharField(max_length=20, default='pending', choices=[
         ('Paid', 'Paid'),
         ('Pending', 'Pending'),
         ('Failed', 'Failed'),
@@ -110,7 +114,7 @@ class Orderdetails(models.Model):
     total_amount=models.IntegerField()
     delivery_address=models.TextField()
     date=models.DateTimeField(default=datetime.now)
-    quantity = models.IntegerField(default=1)
+    is_finished=models.BooleanField(default=False)
 
     def __str__(self):
         return f"Order {self.id} by {self.user.username}"

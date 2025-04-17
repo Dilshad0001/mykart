@@ -50,6 +50,12 @@ class Userlog(APIView):
             'refresh_token': str(refresh),
             'message':"login sucess"
         }, status=200)
+    
+
+class current_user(APIView):
+    permission_classes=[IsAuthenticated]
+    def get(self,request):
+        return Response ({"id":request.user.id,"username":request.user.username})
 
 
 # <-- product users view--->
@@ -61,24 +67,14 @@ class Productuserview(APIView):
     def get(self,request):
         keyword=request.GET.get('keyword')
         product_id=request.GET.get('id')
-        if keyword:
+        if keyword :
             obj=Product.objects.filter(Q(product_name__startswith=keyword)|Q(category__category_name__startswith=keyword))
         elif product_id:
             obj=Product.objects.filter(id=product_id)
         else:
             obj=Product.objects.all()
-
         ser=productserialser(obj,many=True)      
         return Response(ser.data)   
-    # def patch(self,request):
-    #     data_=request.data
-    #     quantity_change=data_.quantityChange
-    #     product_id=data_.productId
-    #     ins=Product.objects.get(id=product_id)
-    #     k=ins.quantity+quantity_change
-    #     ser=productserialser(ins,data=quantity_change,partial=True)
-
-    
 
 
 # <---wishlist users--->
@@ -121,22 +117,18 @@ from .serializers import cartserialiser
 class cartuserview(APIView):
     permission_classes = [IsAuthenticated]
     def get(self,request):
-        obj=Cart.objects.filter(customer=request.user)
+        obj=Cart.objects.filter(customer=request.user,is_finished=False)
         ser=cartserialiser(obj,many=True) 
         return Response(ser.data)
     
     def post(self,request):
-
         user_=request.user
         k=request.data
-        print("kk--",k.get('product'))
         m=Cart.objects.filter(product__id=k.get('product'),customer=user_).first()
         if m is not None:
             m.count=m.count+1
-
             m.save()
             ser = cartserialiser(m, context={'request': request})
-            
             return Response(ser.data)
         ser=cartserialiser(data=k,context={'request':request})
         if ser.is_valid():
@@ -151,8 +143,9 @@ class cartuserview(APIView):
             return Response(" order_id requierd ")    
         ins=Cart.objects.get(id=cart_id)
         new_count=data_.get('count')
-        if new_count is None:
-            return Response("enter count") 
+        sub_total_amount=data_.get('sub_total_amount')
+        if new_count is None and sub_total_amount is None:
+            return Response("data is missing") 
         ser=cartserialiser(ins,data=data_,partial=True)
         if ser.is_valid():
             ser.save()
@@ -170,14 +163,6 @@ class cartuserview(APIView):
         return Response('data_deleted')
 
 
-# from rest_framework import generics
-
-# class WishlistCreateView(generics.CreateAPIView):
-#     queryset = wishlist.objects.all()
-#     serializer_class = wishlistserialiser       
-
-
-
 
 
 # <---order details-->
@@ -188,7 +173,7 @@ from .serializers import orderserialiser,orderserialiseradmin
 class orderuserview(APIView):
     permission_classes=[IsAuthenticated]
     def get (self,request):
-        k=Orderdetails.objects.filter(user=request.user)
+        k=Orderdetails.objects.filter(user=request.user, is_finished=False)
         if k is None:
             return Response('no data found')
         ser=orderserialiser(k,many=True)
@@ -196,27 +181,17 @@ class orderuserview(APIView):
             
 
     def post(self, request):
-        product_id=request.data.get('product_id')
-        quantity=request.data.get('quantity')
-        if not quantity:
-            quantity=1        
-        if not product_id :
-            return Response('product id and quantity requierd')
-        try:
-            produc_t=Product.objects.get(id=product_id)
-        except Product.DoesNotExist:
-            return Response ('product doesnot exist')
-        total_price=produc_t.product_price*int(quantity)  
-        order=Orderdetails.objects.create(
-            user=request.user,
-            product=produc_t,
-            quantity=quantity,
-            total_amount=total_price,
-            payment_status='pending',
-            status='Pending'
-        )
-        ser=orderserialiser(order) 
-        return Response(ser.data)
+        cart_id=request.data.get('carts')      
+        if cart_id is None :
+            return Response('cart id  requierd')
+        ser=orderserialiser(data=request.data,context={'request':request})
+        if ser.is_valid():
+            ser.save()
+            return Response("done")
+        
+        return Response(ser.errors)
+
+
     
 
 # <-- order details admin view--->

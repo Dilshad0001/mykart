@@ -107,14 +107,15 @@ class cartserialiser(serializers.ModelSerializer):
 
     class Meta:
         model=Cart
-        fields=['id','product','customer','count']
+        fields=['id','product','customer','count','sub_total_amount','is_finished']
 
     def to_representation(self, instance):
         return{
             "order_id":instance.id,
             "product":productserialser(instance.product).data,
             "customer":instance.customer.id,
-            "count":instance.count
+            "count":instance.count,
+            "total":instance.sub_total_amount
             
         }    
 
@@ -128,6 +129,7 @@ class cartserialiser(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         print("hhhhhhh")
         instance.count=validated_data.get('count',instance.count)
+        instance.sub_total_amount=validated_data.get('sub_total_amount',instance.sub_total_amount)
         instance.save()
         return instance
     
@@ -138,20 +140,43 @@ class cartserialiser(serializers.ModelSerializer):
       
 
 class orderserialiser(serializers.ModelSerializer):
-    user= serializers.HiddenField(default=serializers.CurrentUserDefault()) 
-    product=productserialser()
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    carts = serializers.PrimaryKeyRelatedField(queryset=Cart.objects.all(),many=True)
+
     class Meta:
-        model=Orderdetails
-        fields=['id','user','product','status','payment_status','total_amount','delivery_address','date','quantity']
+        model = Orderdetails
+        fields = ['id', 'user', 'carts', 'status', 'payment_status', 'total_amount', 'delivery_address', 'date','is_finished']
+
+    def to_representation(self, instance):
+        return {
+            "id": instance.id,
+            "carts": cartserialiser(instance.carts.all(), many=True).data,
+            # "carts": cartserialiser(instance.carts.all(), many=True).data,
+            # "carts":cartserialiser(instance.carts).data,
+            "status": instance.status,
+            "payment_status": instance.payment_status,
+            "total_amount": instance.total_amount,
+            "delivery_address": instance.delivery_address,
+            "date": instance.date
+        }
+
+    def create(self, validated_data):
+        carts_data = validated_data.pop('carts')  # pop out M2M data
+        new_order = Orderdetails.objects.create(**validated_data)
+        new_order.carts.set(carts_data)  # assign M2M after creating
+        return new_order
+
+
+
 
 
  
 class orderserialiseradmin(serializers.ModelSerializer):
     user=customerserialiser()
-    product=productserialser()
+    cart=cartserialiser()
     class Meta:
         model=Orderdetails
-        fields=['id','user','product','status','payment_status','total_amount','delivery_address','date','quantity']     
+        fields=['id','user','cart','status','payment_status','total_amount','delivery_address','date','quantity']     
 
     def update(self,instance,validated_data):
         instance.payment_status=validated_data.get('payment_status',instance.payment_status)   
