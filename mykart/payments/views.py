@@ -28,6 +28,8 @@ class CreatePaymentView(APIView):
             print("useeee-",usek)  
             j=Cart.objects.filter(customer=usek.get('id'))
             print("jjj==",j)
+            # j.delete()
+            print("after j", j)
             amount = int(float(amoun_t) * 100)  
             currency = "INR"
 
@@ -68,6 +70,7 @@ from razorpay import Utility
 
 class VerifyPaymentView(APIView):
     def post(self, request):
+        print("verify started")
         
         try:
             payment_id = request.data.get("payment_id")
@@ -85,6 +88,7 @@ class VerifyPaymentView(APIView):
             order = Order.objects.get(order_id=order_id)
             order.status = 'Paid'
             cart_=Cart.objects.filter(customer=user.get('id')).first()
+            print("cart objects",cart_.is_finished)
             # Orderdetails.objects(user=user.get('id')).delete()
             orderdetails_=Orderdetails.objects.filter(user=user.get('id')).first()
             if cart_:
@@ -95,6 +99,7 @@ class VerifyPaymentView(APIView):
                 orderdetails_.is_finished = True
                 orderdetails_.save()
                 order.save()
+            print("aftyer cart objevt", cart_.is_finished)    
             return Response({"message": "Payment Verified Successfully"}, status=status.HTTP_200_OK)
 
         except razorpay.errors.SignatureVerificationError as e:

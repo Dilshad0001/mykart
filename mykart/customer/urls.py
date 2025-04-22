@@ -2,11 +2,11 @@ from django.urls import path,include
 from. import views
 # from adminuser.views import 
 from rest_framework.routers import DefaultRouter
-from adminuser.views import productadminview,adminuserlistview
+from adminuser.views import productadminview,adminuserlistview,admin_home
 
 
-router = DefaultRouter()
-router.register('product', productadminview, basename='product')
+# router = DefaultRouter()
+# router.register('product_view', productadminview, basename='product_view')
 urlpatterns = [
 
 #   user register and login
@@ -21,12 +21,15 @@ urlpatterns = [
 
 # product
     path('product/',views.Productuserview.as_view()),
-    path('adminproduct/', include(router.urls)),
+    path('adminproduct/product_view/', productadminview.as_view()),
 
 #  order, wishlist & cart 
     path('wishlist/',views.wishlistuserview.as_view()),
     path('cart/',views.cartuserview.as_view()),
     path('order/',views.orderuserview.as_view()),
     path('adminorder/',views.orderadminview.as_view()),
+
+
+    path('adminhome/',admin_home.as_view())
     
 ]

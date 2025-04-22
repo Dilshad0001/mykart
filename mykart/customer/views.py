@@ -48,16 +48,37 @@ class Userlog(APIView):
         return Response({
             'access_token': str(refresh.access_token),
             'refresh_token': str(refresh),
-            'message':"login sucess"
+            'message':"login sucess",
+            # 'user':user
         }, status=200)
     
 
+class UserInfoView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        return Response({
+            "username": user.username,
+            "is_superuser": user.is_superuser,
+            "is_staff": user.is_staff
+        })    
+
+# class current_user(APIView):
+#     permission_classes=[IsAuthenticated]
+#     def get(self,request):
+#         return Response ({"id":request.user.id,"username":request.user.username})
+
 class current_user(APIView):
-    permission_classes=[IsAuthenticated]
-    def get(self,request):
-        return Response ({"id":request.user.id,"username":request.user.username})
+    permission_classes = [IsAuthenticated]
 
-
+    def get(self, request):
+        return Response({
+            "id": request.user.id,
+            "username": request.user.username,
+            "is_admin": request.user.is_superuser,  # <-- add this
+            "is_staff": request.user.is_staff       # <-- optional
+        })
 # <-- product users view--->
 
 from .serializers import productserialser
@@ -117,13 +138,15 @@ from .serializers import cartserialiser
 class cartuserview(APIView):
     permission_classes = [IsAuthenticated]
     def get(self,request):
-        obj=Cart.objects.filter(customer=request.user,is_finished=False)
+        obj=Cart.objects.filter(customer=request.user)
         ser=cartserialiser(obj,many=True) 
         return Response(ser.data)
     
     def post(self,request):
+        print("strtedd")
         user_=request.user
         k=request.data
+        print("reqqqq===",request.data)
         m=Cart.objects.filter(product__id=k.get('product'),customer=user_).first()
         if m is not None:
             m.count=m.count+1
@@ -211,6 +234,10 @@ class orderadminview(APIView):
         order_data=Orderdetails.objects.filter(id=k['order_id']).first()
         if order_data is None:
             return Response('order not found')
+        cust=User.objects.get(orderdetails__id=k['order_id'])
+        cust.order_number=cust.order_number+1
+        cust.save()
+        print("custt",request.data)
         ser=orderserialiseradmin(order_data,data=k,partial=True)
         if ser.is_valid():
             ser.save()

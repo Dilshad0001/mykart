@@ -24,6 +24,8 @@ class CustomUserManager(BaseUserManager):
 
 class User(AbstractBaseUser,PermissionsMixin):
     username = models.CharField(max_length=150, unique=True)
+    user_email=models.EmailField()
+    order_number=models.PositiveBigIntegerField(default=0)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
@@ -100,7 +102,7 @@ class Orderdetails(models.Model):
     # cart=models.ForeignKey(Cart, on_delete=models.CASCADE, null=True) 
     carts = models.ManyToManyField(Cart)
  
-    status = models.CharField(max_length=20, default='prnding', choices=[
+    status = models.CharField(max_length=20, default='pending', choices=[
         ('Pending', 'Pending'),
         ('Completed', 'Completed'),
         ('Cancelled', 'Cancelled'),
