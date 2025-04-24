@@ -224,7 +224,7 @@ class orderadminview(APIView):
     def get(self,request):
         keyword=request.GET.get('user')
         if keyword:
-            obj=Orderdetails.objects.filter(user__username__startswith=keyword)
+            obj=Orderdetails.objects.filter(user__username__startswith=keyword).order_by("-id")
         else:
             obj=Orderdetails.objects.all()
         ser=orderserialiseradmin(obj,many=True)

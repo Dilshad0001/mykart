@@ -6,6 +6,11 @@ from customer.models import User
 from rest_framework.permissions import IsAuthenticated,IsAdminUser
 
 
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.response import Response
+
+
+
 # <-- product users view--->
 
 from customer .serializers import productserialser
@@ -31,11 +36,23 @@ from customer.models import Product
 
 class productadminview(APIView):
     # permission_classes=[IsAdminUser]
-    def get(self,request):
-        print("getttx   ")
-        k=Product.objects.all()
-        ser=productserialser(k,many=True)
-        return Response(ser.data)
+    # def get(self,request):
+    #     print("getttx   ")
+    #     k=Product.objects.all().order_by("-id")
+    #     ser=productserialser(k,many=True)
+    #     return Response(ser.data)
+
+    def get(self, request):
+        #   print("getttx   ")
+        products = Product.objects.all().order_by("-id")
+
+        paginator = PageNumberPagination()
+        paginator.page_size = 5  # Optional: override here
+        result_page = paginator.paginate_queryset(products, request)
+
+        serializer = productserialser(result_page, many=True)
+        return paginator.get_paginated_response(serializer.data)
+
     def post(self,request):
         print("postt",request.data)
         ser=productserialser(data=request.data)
@@ -94,16 +111,35 @@ class productadminview(APIView):
 
 from customer.serializers import customerserialiser
 
+# class adminuserlistview(APIView):
+#     # permission_classes=[IsAdminUser]
+#     def get(self,request):
+#         # keyword=request.GET.get('keyword')
+#         # if keyword:
+#             # users_data=User.objects.filter(username__startswith=keyword)
+#         # else:
+#         users_data=User.objects.all()    
+#         ser=customerserialiser(users_data,many=True)
+#         return Response (ser.data)
+
+from rest_framework.pagination import PageNumberPagination
+
+class CustomPagination(PageNumberPagination):
+    page_size = 5  # You can adjust the page size here
+    page_size_query_param = 'page_size'  # Optional: Allows the client to adjust the page size
+    max_page_size = 100  # Optional: Max limit for page size
+
 class adminuserlistview(APIView):
     # permission_classes=[IsAdminUser]
-    def get(self,request):
-        # keyword=request.GET.get('keyword')
-        # if keyword:
-            # users_data=User.objects.filter(username__startswith=keyword)
-        # else:
-        users_data=User.objects.all()    
-        ser=customerserialiser(users_data,many=True)
-        return Response (ser.data)
+    def get(self, request):
+        users_data = User.objects.all()
+        
+        paginator = CustomPagination()
+        result_page = paginator.paginate_queryset(users_data, request)
+        
+        ser = customerserialiser(result_page, many=True)
+        return paginator.get_paginated_response(ser.data)
+
     def put(self,request):
         print("userdata----",request.data)
         data_=request.data
