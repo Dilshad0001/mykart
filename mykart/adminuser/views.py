@@ -35,12 +35,6 @@ from customer.models import Product
 #         return Response ("validation failed")
 
 class productadminview(APIView):
-    # permission_classes=[IsAdminUser]
-    # def get(self,request):
-    #     print("getttx   ")
-    #     k=Product.objects.all().order_by("-id")
-    #     ser=productserialser(k,many=True)
-    #     return Response(ser.data)
 
     def get(self, request):
         #   print("getttx   ")
