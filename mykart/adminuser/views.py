@@ -37,7 +37,6 @@ from customer.models import Product
 class productadminview(APIView):
 
     def get(self, request):
-        #   print("getttx   ")
         products = Product.objects.all().order_by("-id")
 
         paginator = PageNumberPagination()
