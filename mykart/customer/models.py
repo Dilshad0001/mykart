@@ -57,12 +57,10 @@ class Category(models.Model):
 class Product(models.Model):
     product_name=models.CharField(max_length=20)
     category=models.ForeignKey(Category,on_delete=models.CASCADE)
-    # product_rating=models.IntegerField(null=True)
     product_price = models.IntegerField()
     product_image=models.ImageField(upload_to='image/',null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     product_decription=models.TextField(null=True,blank=True)
-    # quantity=models.PositiveIntegerField(default=1)
 
 
     def __str__(self):
@@ -99,7 +97,6 @@ from datetime import datetime
 
 class Orderdetails(models.Model):
     user=models.ForeignKey(User,on_delete=models.CASCADE)
-    # cart=models.ForeignKey(Cart, on_delete=models.CASCADE, null=True) 
     carts = models.ManyToManyField(Cart)
  
     status = models.CharField(max_length=20, default='pending', choices=[

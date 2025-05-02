@@ -22,7 +22,6 @@ class userregister(APIView):
         if ser.is_valid():
             ser.save()
             return Response({"messages": "registration completed"}, status=status.HTTP_201_CREATED)
-        print(ser.errors)
         return Response(ser.errors, status=status.HTTP_400_BAD_REQUEST)  
       
 
@@ -49,7 +48,6 @@ class Userlog(APIView):
             'access_token': str(refresh.access_token),
             'refresh_token': str(refresh),
             'message':"login sucess",
-            # 'user':user
         }, status=200)
     
 
@@ -64,10 +62,6 @@ class UserInfoView(APIView):
             "is_staff": user.is_staff
         })    
 
-# class current_user(APIView):
-#     permission_classes=[IsAuthenticated]
-#     def get(self,request):
-#         return Response ({"id":request.user.id,"username":request.user.username})
 
 class current_user(APIView):
     permission_classes = [IsAuthenticated]
@@ -76,8 +70,8 @@ class current_user(APIView):
         return Response({
             "id": request.user.id,
             "username": request.user.username,
-            "is_admin": request.user.is_superuser,  # <-- add this
-            "is_staff": request.user.is_staff       # <-- optional
+            "is_admin": request.user.is_superuser,  
+            "is_staff": request.user.is_staff       
         })
 # <-- product users view--->
 
@@ -143,10 +137,8 @@ class cartuserview(APIView):
         return Response(ser.data)
     
     def post(self,request):
-        print("strtedd")
         user_=request.user
         k=request.data
-        print("reqqqq===",request.data)
         m=Cart.objects.filter(product__id=k.get('product'),customer=user_).first()
         if m is not None:
             m.count=m.count+1

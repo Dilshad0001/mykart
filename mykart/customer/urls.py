@@ -1,12 +1,9 @@
 from django.urls import path,include
 from. import views
-# from adminuser.views import 
-from rest_framework.routers import DefaultRouter
 from adminuser.views import productadminview,adminuserlistview,admin_home
 
 
-# router = DefaultRouter()
-# router.register('product_view', productadminview, basename='product_view')
+
 urlpatterns = [
 
 #   user register and login
