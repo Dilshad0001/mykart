@@ -60,6 +60,7 @@ class Product(models.Model):
     product_price = models.IntegerField()
     product_image=models.ImageField(upload_to='image/',null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    
     product_decription=models.TextField(null=True,blank=True)
 
 
