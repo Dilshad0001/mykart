@@ -31,6 +31,8 @@ class userregister(APIView):
 
 from .serializers import LogSerializer
 
+
+
 class Userlog(APIView):
     def post(self, request):
         user_data = request.data

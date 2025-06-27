@@ -1,0 +1,14 @@
+# Ignore Python virtual environment
+env/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# SQLite DB (optional if you don't want to track it)
+*.sqlite3
+
+# OS files
+.DS_Store
+Thumbs.db
